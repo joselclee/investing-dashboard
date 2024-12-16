@@ -1,0 +1,10 @@
+Before running dev env, must have:
+
+- git installed
+- meson installed (https://github.com/mesonbuild/meson/releases)
+- cmake installed (https://cmake.org/download/)
+- pistache installed (https://pistacheio.github.io/pistache/docs/)
+- node.js installed
+- sql installed
+- aws-sdk for c++ installed (https://github.com/aws/aws-sdk-cpp)
+- yliveticker installed (https://github.com/yahoofinancelive/yliveticker`)
