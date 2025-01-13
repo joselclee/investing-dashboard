@@ -1,3 +1,9 @@
-.header {
-    background-color: grey !important;
+.custom-header {
+    background-color: #E5E4E2 !important;
+    border-radius: 4px;
+    
+}
+.custom-brand {
+    margin-left: 3vh;
+    color: black !important;
 }
