@@ -1,12 +1,21 @@
 import './App.css';
-import Header from './components/Header'
-import Footer from './components/Footer'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+
+import Home from './pages/Home'
+import Var from './pages/Var'
+import Optimize from './pages/Optimize'
 
 function App() {
   return (
     <div className="App">
-      <Header />
-      <Footer />
+      <Router>
+        <Routes>
+          <Route path="/" element={<Home />}/>
+          <Route path="/Home" element={<Home />}/>
+          <Route path="/Var" element={<Var />}/>
+          <Route path="Optimize" element={<Optimize />}/>
+        </Routes>
+      </Router>
     </div>
   );
 }

@@ -5,13 +5,17 @@ const Header = () => {
   return (
     <div>
         <Navbar expand="lg" className="custom-header">
-            <Navbar.Brand className="custom-brand">Dashboard</Navbar.Brand>
+            <Navbar.Brand className="custom-brand">
+              <Nav.Link href="/">
+                Dashboard
+              </Nav.Link>
+            </Navbar.Brand>
             <Navbar.Toggle aria-controls="basic-navbar-nav" />
             <Navbar.Collapse id="basic-navbar-nav">
               <Nav className="me-auto">
-                <Nav.Link href="#home">Home</Nav.Link>
-                <Nav.Link href="#link">Optimize Portfolio</Nav.Link>
-                <Nav.Link href="#link">Simulate Value at Risk</Nav.Link>
+                <Nav.Link href="/Home">Home</Nav.Link>
+                <Nav.Link href="/Optimize">Optimize Portfolio</Nav.Link>
+                <Nav.Link href="/Var">Simulate Value at Risk</Nav.Link>
               </Nav>
             </Navbar.Collapse>
         </Navbar>
