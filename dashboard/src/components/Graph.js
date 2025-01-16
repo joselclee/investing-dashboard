@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { Line } from 'react-chartjs-2';
 import { Chart as ChartJS, LineElement, PointElement, LinearScale, Title, CategoryScale } from 'chart.js';
-import './Graph.css'; // Import the CSS file
+import './Graph.css';
 
 ChartJS.register(LineElement, PointElement, LinearScale, Title, CategoryScale);
 
@@ -13,7 +13,7 @@ const Graph = () => {
       {
         label: 'S&P 500 Performance',
         data: [],
-        borderColor: 'rgba(75,192,192,1)',
+        borderColor: 'rgba(40, 40, 134, 0.75)',
         backgroundColor: 'rgba(75,192,192,0.2)',
         fill: true,
       },
@@ -27,13 +27,23 @@ const Graph = () => {
         grid: {
           display: false,
         },
+        ticks: {
+          maxRotation: 0,
+          minRotation: 0,
+        },
       },
       y: {
         grid: {
-          display: false,
+          display: true,
         },
       },
     },
+    plugins: {
+      title: {
+        display: true,
+        text: 'Potential S&P 500 Performance Over 1 Year',
+      }
+    }
   };
 
   useEffect(() => {
@@ -67,7 +77,7 @@ const Graph = () => {
           ],
         };
       });
-    }, 10); // Reduced interval time to 10ms
+    }, 50); // Reduced interval time to 10ms
 
     return () => clearInterval(interval);
   }, []);

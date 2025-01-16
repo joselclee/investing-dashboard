@@ -10,6 +10,11 @@ const Var = () => {
   return (
     <Container fluid>
         <Header />
+        <Row>
+          <Col>
+            
+          </Col>
+        </Row>
         <Footer />
     </Container>
   )
