@@ -1,0 +1,15 @@
+.form-left-align {
+    text-align: left;
+  }
+
+.button-one {
+    background-color: #c3cad030 !important;
+    color: #112A46 !important;
+    border-color: #112A46 !important;
+}
+
+.button-one:hover {
+    background-color: white !important;
+    color: black !important;
+    border-color: #112A46 !important;
+}
