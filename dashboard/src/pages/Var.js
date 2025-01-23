@@ -4,10 +4,11 @@ import Footer from '../components/Footer';
 import Visualizer from '../components/Visualizer';
 import { Container, Row, Col, Form, Button } from 'react-bootstrap';
 import axios from 'axios';
+import { animateScroll as scroll } from 'react-scroll';
 import './Page.css';
 
 const Var = () => {
-  const [formData, setFormData] = useState({
+  const initialFormData = {
     years: '',
     portfolio_value: '',
     days: '',
@@ -15,10 +16,12 @@ const Var = () => {
     confidence_level: 0.95,
     weights: [''],
     tickers: ['']
-  });
+  };
 
+  const [formData, setFormData] = useState(initialFormData);
   const [isDollar, setIsDollar] = useState(false);
   const [responseData, setResponseData] = useState([]);
+  const [isGraphVisible, setIsGraphVisible] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -80,19 +83,29 @@ const Var = () => {
     try {
       const response = await axios.post('http://localhost:5000/api/v1/monte-carlo-var', formattedData);
       setResponseData(response.data.scenario_return);
+      setIsGraphVisible(true);
+      scroll.scrollToBottom(); // Scroll to the bottom of the page
       console.log('Response:', response.data);
     } catch (error) {
       console.error('Error:', error);
     }
   };
 
+  const handleReset = () => {
+    setFormData(initialFormData);
+    setIsGraphVisible(false);
+  };
+
   return (
     <div>
       <Header />
       <Container fluid style={{ paddingBottom: '100px'}}>
+        <br/>
+        <br/>
         <Row className="left-align">
+        <Col />
           <Col>
-            <Form onSubmit={handleSubmit} className="form-left-align">
+            <Form onSubmit={handleSubmit}>
               <Form.Group controlId="years">
                 <Form.Label>Years</Form.Label>
                 <Form.Control
@@ -183,11 +196,15 @@ const Var = () => {
                     </Col>
                   </Row>
                 ))}
+                <br/>
                 <Button onClick={addTicker} className="me-2 button-one">
                   Add Ticker
                 </Button>
-                <Button className="button-one" type="submit">
+                <Button className="button-one me-2" type="submit">
                   Submit
+                </Button>
+                <Button className="button-one me-2" type="button" onClick={handleReset}>
+                  Reset
                 </Button>
                 <Form.Check 
                   className="custom-switch"
@@ -200,9 +217,12 @@ const Var = () => {
               </Form.Group>
             </Form>
           </Col>
-          <Col md={10}>
-            <Visualizer data={responseData} />
+          <Col />
+          <Row>
+          <Col>
+            {isGraphVisible && <Visualizer data={responseData} />}
           </Col>
+          </Row>
         </Row>
       </Container>
       <Footer />

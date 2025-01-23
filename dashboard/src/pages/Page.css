@@ -1,3 +1,9 @@
+/* Text */
+.account-text {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+
 .form-left-align {
     text-align: left;
   }
@@ -71,4 +77,10 @@ input[type="range"]::-moz-range-thumb {
     background: #112A46;
     cursor: pointer;
     border-radius: 50%;
+}
+
+.pie-chart-container {
+  width: 300px;
+  height: 300px;
+  margin: 0 auto;
 }

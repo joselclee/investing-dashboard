@@ -1,8 +1,17 @@
+body, html {
+    overflow:visible;
+}
+.header-wrapper {
+    position: -webkit-sticky; /* For Safari */
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
 .custom-header {
     background-color: white !important;
     border-radius: 4px;
     margin-left: 6.5vh;
-    
 }
 .custom-brand {
     margin-left: 3vh;
@@ -20,5 +29,8 @@
     background-color: #c3cad030 !important;
     color:#112A46 !important;
     border-radius: 4px;
+}
 
+.login {
+    margin-right: 3vh;
 }
