@@ -14,6 +14,12 @@
     border-color: #112A46 !important;
 }
 
+.button-two {
+    background-color: #112A46 !important;
+    color: white !important;
+    border-color: #112A46 !important;
+}
+
 .button-one:hover {
     background-color: white !important;
     color: black !important;
@@ -29,6 +35,10 @@
     background-color: white !important;
     color: #791e1e !important;
     border-color: #791e1e !important;
+}
+
+.button-one, .button-two {
+  animation: pulse 2s infinite;
 }
 
 .custom-switch .form-check-input:checked {
@@ -84,3 +94,36 @@ input[type="range"]::-moz-range-thumb {
   height: 300px;
   margin: 0 auto;
 }
+
+/* Animation for form */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.form-container {
+  animation: fadeIn 1s ease-in-out;
+  background: #f9f9f9;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Animation for buttons */
+/* @keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+} */

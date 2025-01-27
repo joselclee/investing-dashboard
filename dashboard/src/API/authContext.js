@@ -23,6 +23,7 @@ export const AuthProvider = ({ children }) => {
     currentUser,
     login,
     logout,
+    auth, // Ensure auth is included in the context value
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

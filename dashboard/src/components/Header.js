@@ -1,7 +1,11 @@
+import React from 'react';
 import { Nav, Navbar } from 'react-bootstrap';
+import { useAuth } from '../API/authContext';
 import './Header.css';
 
 const Header = () => {
+  const { currentUser } = useAuth();
+
   return (
     <div className="header-wrapper">
       <Navbar expand="lg" className="custom-header">
@@ -14,7 +18,11 @@ const Header = () => {
             <Nav.Link className="custom-button" href="/About">About</Nav.Link>
           </Nav>
           <Nav className="ms-auto">
-            <Nav.Link className="custom-button login" href="/Login">Login</Nav.Link>
+            {currentUser ? (
+              <Nav.Link className="custom-button login" href="/Profile">Account</Nav.Link>
+            ) : (
+              <Nav.Link className="custom-button login" href="/Login">Login</Nav.Link>
+            )}
           </Nav>
         </Navbar.Collapse>
       </Navbar>

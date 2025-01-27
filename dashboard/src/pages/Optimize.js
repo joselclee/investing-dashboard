@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import { Container, Row, Col, Form, Button } from 'react-bootstrap';
+import { Container, Row, Col, Form, Button, OverlayTrigger, Tooltip as BootstrapTooltip } from 'react-bootstrap';
 import axios from 'axios';
 import { Pie } from 'react-chartjs-2';
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import { Chart as ChartJS, ArcElement, Tooltip as ChartTooltip, Legend } from 'chart.js';
 import { animateScroll as scroll } from 'react-scroll';
 import './Page.css';
 
 // Register the necessary elements, scales, and controllers
-ChartJS.register(ArcElement, Tooltip, Legend);
+ChartJS.register(ArcElement, ChartTooltip, Legend);
 
 const Optimize = () => {
   const initialFormData = {
@@ -148,7 +148,12 @@ const Optimize = () => {
               </Form.Group>
               <br/>
               <Form.Group controlId="years">
-                <Form.Label>Years</Form.Label>
+                <OverlayTrigger
+                  placement="top"
+                  overlay={<BootstrapTooltip id="tooltip-years">Number of years of past performance to include for decision</BootstrapTooltip>}
+                >
+                  <Form.Label>Years</Form.Label>
+                </OverlayTrigger>
                 <Form.Control
                   type="number"
                   name="years"
