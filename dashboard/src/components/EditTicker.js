@@ -3,6 +3,8 @@ import { Modal, Form, Button } from 'react-bootstrap';
 import axios from 'axios';
 import { useAuth } from '../API/authContext';
 
+import '../pages/Page.css';
+
 const EditTicker = ({ show, handleClose, ticker, onTickerUpdated }) => {
   const [newValue, setNewValue] = useState(ticker.value);
   const { currentUser } = useAuth();
@@ -57,10 +59,10 @@ const EditTicker = ({ show, handleClose, ticker, onTickerUpdated }) => {
         </Form>
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="secondary" onClick={handleClose}>
+        <Button className="button-one" onClick={handleClose}>
           Close
         </Button>
-        <Button variant="primary" onClick={handleUpdateTickerValue}>
+        <Button className="button-two" onClick={handleUpdateTickerValue}>
           Update Ticker
         </Button>
       </Modal.Footer>

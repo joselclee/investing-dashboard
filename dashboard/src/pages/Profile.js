@@ -14,6 +14,7 @@ const Profile = () => {
   const [showEditTickerModal, setShowEditTickerModal] = useState(false);
   const [tickers, setTickers] = useState([]);
   const [PortfolioValue, setPortfolioValue] = useState(null);
+  const [Owned, setOwned] = useState(null);
   const [selectedTicker, setSelectedTicker] = useState(null);
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
@@ -67,24 +68,38 @@ const Profile = () => {
     ],
   };
 
+  const updateOwned = async () => {
+    setOwned(null);
+  };
+
   return (
     <div>
       <Header />
       <Container>
         <Row>
+          <Col>
+            <Row>
+              {Owned && <h3 className="account-text">Portfolio owned for: ${Owned}</h3>}
+            </Row>
+            <Row>
+              <Button className="button-one" onClick={updateOwned}>
+                Update Account
+              </Button>
+            </Row>
+          </Col>
           <Col/>
           <Col>
             <div className="pie-chart-container">
               <Pie data={chartData} />
             </div>
             <div>
-              {PortfolioValue && <h2>Portfolio Value: ${PortfolioValue.toFixed(2)}</h2>}
+              {PortfolioValue && <h3>Portfolio Value: ${PortfolioValue.toFixed(2)}</h3>}
             </div>
           </Col>
-          <Col/>
         </Row>
         <br/>
         <Row>
+        <Col/>
         <Col/>
         <Col>
         <br/>
@@ -128,8 +143,8 @@ const Profile = () => {
               )}
             </div>
           </Col>
-          <Col/>
         </Row>
+        <br/><br/>
       </Container>
       <Footer />
     </div>
