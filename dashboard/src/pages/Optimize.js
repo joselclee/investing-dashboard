@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { Container, Row, Col, Form, Button, OverlayTrigger, Tooltip as BootstrapTooltip } from 'react-bootstrap';
@@ -6,9 +6,9 @@ import axios from 'axios';
 import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip as ChartTooltip, Legend } from 'chart.js';
 import { animateScroll as scroll } from 'react-scroll';
+import { useAuth } from '../API/authContext';
 import './Page.css';
 
-// Register the necessary elements, scales, and controllers
 ChartJS.register(ArcElement, ChartTooltip, Legend);
 
 const Optimize = () => {
@@ -16,7 +16,7 @@ const Optimize = () => {
     portfolio_value: '',
     tickers: [''],
     weights: [''],
-    years: '' // Add years to the initial form data
+    years: ''
   };
 
   const [formData, setFormData] = useState(initialFormData);
@@ -24,6 +24,7 @@ const Optimize = () => {
   const [oldPortfolio, setOldPortfolio] = useState({ tickers: [], weights: [] });
   const [newPortfolio, setNewPortfolio] = useState({ tickers: [], weights: [] });
   const [isGraphVisible, setIsGraphVisible] = useState(false);
+  const { currentUser } = useAuth();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -83,7 +84,7 @@ const Optimize = () => {
       setOldPortfolio({ tickers: formData.tickers, weights: formattedData.weights });
       setNewPortfolio({ tickers: formData.tickers, weights: response.data.optimal_weights });
       setIsGraphVisible(true);
-      scroll.scrollToBottom(); // Scroll to the bottom of the page
+      scroll.scrollToBottom();
     } catch (error) {
       console.error('Error:', error);
     }
@@ -92,6 +93,35 @@ const Optimize = () => {
   const handleReset = () => {
     setFormData(initialFormData);
     setIsGraphVisible(false);
+  };
+
+  const handleAutofill = async () => {
+    if (currentUser) {
+      try {
+        const idToken = await currentUser.getIdToken();
+        const userId = currentUser.uid;
+        const response = await axios.get(
+          'http://localhost:5000/api/v1/get-tickers',
+          {
+            headers: {
+              Authorization: `Bearer ${idToken}`,
+            },
+            params: {
+              user_id: userId,
+            },
+          }
+        );
+        const tickers = response.data.tickers.map(ticker => ticker.ticker);
+        const weights = response.data.tickers.map(ticker => ticker.value);
+        setFormData({
+          ...formData,
+          tickers,
+          weights
+        });
+      } catch (error) {
+        console.error('Error fetching tickers:', error.response ? error.response.data : error.message);
+      }
+    }
   };
 
   const generateChartData = (portfolio) => {
@@ -120,9 +150,9 @@ const Optimize = () => {
 
   const chartOptions = {
     animation: {
-      duration: 1000, // Animation duration in milliseconds
-      easing: 'easeInOutQuad', // Animation easing function
-      animateRotate: true, // Enable rotation animation
+      duration: 1000,
+      easing: 'easeInOutQuad',
+      animateRotate: true,
     },
     maintainAspectRatio: false,
   };
@@ -210,6 +240,11 @@ const Optimize = () => {
                 <Button className="button-one me-2" type="button" onClick={handleReset}>
                   Reset
                 </Button>
+                {currentUser && (
+                  <Button className="button-one me-2" type="button" onClick={handleAutofill}>
+                    Autofill
+                  </Button>
+                )}
                 <Form.Check 
                   className="custom-switch"
                   type="switch"

@@ -41,7 +41,6 @@ const Graph = () => {
     plugins: {
       title: {
         display: true,
-        text: 'Potential S&P 500 Performance Over 1 Year',
       }
     }
   };

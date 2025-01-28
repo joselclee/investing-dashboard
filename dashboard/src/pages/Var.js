@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import Visualizer from '../components/Visualizer';
 import { Container, Row, Col, Form, Button } from 'react-bootstrap';
 import axios from 'axios';
 import { animateScroll as scroll } from 'react-scroll';
+import { useAuth } from '../API/authContext';
 import './Page.css';
 
 const Var = () => {
@@ -22,6 +23,7 @@ const Var = () => {
   const [isDollar, setIsDollar] = useState(false);
   const [responseData, setResponseData] = useState([]);
   const [isGraphVisible, setIsGraphVisible] = useState(false);
+  const { currentUser } = useAuth();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -84,7 +86,7 @@ const Var = () => {
       const response = await axios.post('http://localhost:5000/api/v1/monte-carlo-var', formattedData);
       setResponseData(response.data.scenario_return);
       setIsGraphVisible(true);
-      scroll.scrollToBottom(); // Scroll to the bottom of the page
+      scroll.scrollToBottom();
       console.log('Response:', response.data);
     } catch (error) {
       console.error('Error:', error);
@@ -94,6 +96,35 @@ const Var = () => {
   const handleReset = () => {
     setFormData(initialFormData);
     setIsGraphVisible(false);
+  };
+
+  const handleAutofill = async () => {
+    if (currentUser) {
+      try {
+        const idToken = await currentUser.getIdToken();
+        const userId = currentUser.uid;
+        const response = await axios.get(
+          'http://localhost:5000/api/v1/get-tickers',
+          {
+            headers: {
+              Authorization: `Bearer ${idToken}`,
+            },
+            params: {
+              user_id: userId,
+            },
+          }
+        );
+        const tickers = response.data.tickers.map(ticker => ticker.ticker);
+        const weights = response.data.tickers.map(ticker => ticker.value);
+        setFormData({
+          ...formData,
+          tickers,
+          weights
+        });
+      } catch (error) {
+        console.error('Error fetching tickers:', error.response ? error.response.data : error.message);
+      }
+    }
   };
 
   return (
@@ -206,6 +237,11 @@ const Var = () => {
                 <Button className="button-one me-2" type="button" onClick={handleReset}>
                   Reset
                 </Button>
+                {currentUser && (
+                  <Button className="button-one me-2" type="button" onClick={handleAutofill}>
+                    Autofill
+                  </Button>
+                )}
                 <Form.Check 
                   className="custom-switch"
                   type="switch"

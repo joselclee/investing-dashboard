@@ -7,6 +7,7 @@ import { Container, Row, Col, Button, ListGroup } from 'react-bootstrap';
 import { Pie } from 'react-chartjs-2';
 import axios from 'axios';
 import { useAuth } from '../API/authContext';
+import { useNavigate } from 'react-router-dom';
 
 const Profile = () => {
   const [showAddTickerModal, setShowAddTickerModal] = useState(false);
@@ -14,7 +15,8 @@ const Profile = () => {
   const [tickers, setTickers] = useState([]);
   const [PortfolioValue, setPortfolioValue] = useState(null);
   const [selectedTicker, setSelectedTicker] = useState(null);
-  const { currentUser } = useAuth();
+  const { currentUser, logout } = useAuth();
+  const navigate = useNavigate();
 
   const handleTickerAdded = () => {
     // Handle any additional logic after a ticker is added
@@ -50,6 +52,11 @@ const Profile = () => {
     fetchTickers();
   }, [currentUser]);
 
+  const handleLogout = async () => {
+    await logout();
+    navigate('/Home');
+  };
+
   const chartData = {
     labels: tickers.map(ticker => ticker.ticker),
     datasets: [
@@ -65,7 +72,8 @@ const Profile = () => {
       <Header />
       <Container>
         <Row>
-          <Col xs={6}>
+          <Col/>
+          <Col>
             <div className="pie-chart-container">
               <Pie data={chartData} />
             </div>
@@ -73,44 +81,54 @@ const Profile = () => {
               {PortfolioValue && <h2>Portfolio Value: ${PortfolioValue.toFixed(2)}</h2>}
             </div>
           </Col>
-          <Col xs={5}>
-            <div className="container">
-              <Button onClick={() => setShowAddTickerModal(true)}>
-                Add Ticker
-              </Button>
-              <AddTicker
-                show={showAddTickerModal}
-                handleClose={() => setShowAddTickerModal(false)}
-                onTickerAdded={handleTickerAdded}
-              />
-              <ListGroup>
-                {tickers.map((ticker) => (
-                  <ListGroup.Item key={ticker.ticker}>
-                    {ticker.ticker} - {ticker.value} shares
-                    <Button
-                      variant="warning"
-                      size="sm"
-                      className="float-end"
-                      onClick={() => {
-                        setSelectedTicker(ticker);
-                        setShowEditTickerModal(true);
-                      }}
-                    >
-                      Edit
-                    </Button>
-                  </ListGroup.Item>
-                ))}
+          <Col/>
+        </Row>
+        <br/>
+        <Row>
+        <Col/>
+        <Col>
+        <br/>
+          <div className="container">
+            <Button className="button-one" onClick={() => setShowAddTickerModal(true)}>
+              Add Ticker
+            </Button>
+            <Button onClick={handleLogout} className="ms-2 button-rm">
+              Logout
+            </Button>
+            <AddTicker
+              show={showAddTickerModal}
+              handleClose={() => setShowAddTickerModal(false)}
+              onTickerAdded={handleTickerAdded}
+            />
+            <br/><br/>
+            <ListGroup>
+              {tickers.map((ticker) => (
+                <ListGroup.Item key={ticker.ticker}>
+                  {ticker.ticker} - {ticker.value} shares
+                  <Button
+                    size="sm"
+                    className="float-end button-two"
+                    onClick={() => {
+                      setSelectedTicker(ticker);
+                      setShowEditTickerModal(true);
+                    }}
+                  >
+                    Edit
+                  </Button>
+                </ListGroup.Item>
+              ))}
               </ListGroup>
               {selectedTicker && (
                 <EditTicker
                   show={showEditTickerModal}
-                  handleClose={() => setShowEditTickerModal(false)}
-                  ticker={selectedTicker}
-                  onTickerUpdated={fetchTickers}
+                 handleClose={() => setShowEditTickerModal(false)}
+                 ticker={selectedTicker}
+                 onTickerUpdated={fetchTickers}
                 />
               )}
             </div>
           </Col>
+          <Col/>
         </Row>
       </Container>
       <Footer />
