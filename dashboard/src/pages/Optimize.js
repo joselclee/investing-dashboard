@@ -101,7 +101,7 @@ const Optimize = () => {
         const idToken = await currentUser.getIdToken();
         const userId = currentUser.uid;
         const response = await axios.get(
-          'http://localhost:5000/api/v1/get-tickers',
+          `http://localhost:5000/api/v1/account/${userId}`,
           {
             headers: {
               Authorization: `Bearer ${idToken}`,

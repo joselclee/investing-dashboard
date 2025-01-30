@@ -1,17 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
-import AddTicker from '../components/AddTicker';
-import EditTicker from '../components/EditTicker';
 import { Container, Row, Col, Button, ListGroup } from 'react-bootstrap';
 import { Pie } from 'react-chartjs-2';
 import axios from 'axios';
 import { useAuth } from '../API/authContext';
 import { useNavigate } from 'react-router-dom';
 
+import Header from '../components/Header';
+import Footer from '../components/Footer';
+import AddTicker from '../components/AddTicker';
+import EditTicker from '../components/EditTicker';
+import UpdateOwned from '../components/UpdateOwned';
+
 const Profile = () => {
   const [showAddTickerModal, setShowAddTickerModal] = useState(false);
   const [showEditTickerModal, setShowEditTickerModal] = useState(false);
+  const [showUpdateOwnedModal, setShowUpdateOwnedModal] = useState(false);
   const [tickers, setTickers] = useState([]);
   const [PortfolioValue, setPortfolioValue] = useState(null);
   const [Owned, setOwned] = useState(null);
@@ -31,7 +34,7 @@ const Profile = () => {
         const idToken = await currentUser.getIdToken();
         const userId = currentUser.uid;
         const response = await axios.get(
-          'http://localhost:5000/api/v1/get-tickers',
+          `http://localhost:5000/api/v1/account/${userId}`,
           {
             headers: {
               Authorization: `Bearer ${idToken}`,
@@ -58,6 +61,10 @@ const Profile = () => {
     navigate('/Home');
   };
 
+  const handleOwnedUpdated = (yearsOwned) => {
+    setOwned(yearsOwned);
+  };
+
   const chartData = {
     labels: tickers.map(ticker => ticker.ticker),
     datasets: [
@@ -68,10 +75,6 @@ const Profile = () => {
     ],
   };
 
-  const updateOwned = async () => {
-    setOwned(null);
-  };
-
   return (
     <div>
       <Header />
@@ -79,10 +82,10 @@ const Profile = () => {
         <Row>
           <Col>
             <Row>
-              {Owned && <h3 className="account-text">Portfolio owned for: ${Owned}</h3>}
+              <h3>Profile</h3>
             </Row>
             <Row>
-              <Button className="button-one" onClick={updateOwned}>
+              <Button className="button-one" onClick={() => setShowUpdateOwnedModal(true)}>
                 Update Account
               </Button>
             </Row>
@@ -141,6 +144,11 @@ const Profile = () => {
                  onTickerUpdated={fetchTickers}
                 />
               )}
+              <UpdateOwned
+                show={showUpdateOwnedModal}
+                handleClose={() => setShowUpdateOwnedModal(false)}
+                onOwnedUpdated={handleOwnedUpdated}
+              />
             </div>
           </Col>
         </Row>
@@ -151,4 +159,4 @@ const Profile = () => {
   );
 };
 
-export default Profile;
+export default Profile; 
