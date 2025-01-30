@@ -160,7 +160,7 @@ const Optimize = () => {
   return (
     <div>
       <Header />
-      <Container fluid style={{ paddingBottom: '100px'}}>
+      <Container className="full-height">
         <br/>
         <br/>
         <Row className="left-align">

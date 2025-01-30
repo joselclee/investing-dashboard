@@ -1,8 +1,11 @@
+/* Height/Width modifiers */
+.full-height {
+  height: 110vh;
+}
 /* Text */
 .account-text {
   font-family: Arial, Helvetica, sans-serif;
 }
-
 
 .form-left-align {
     text-align: left;

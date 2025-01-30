@@ -4,6 +4,7 @@ import { Line } from 'react-chartjs-2';
 import axios from 'axios';
 import { useAuth } from '../API/authContext';
 import { useNavigate } from 'react-router-dom';
+import './Page.css';
 import {
   Chart as ChartJS,
   LineElement,
@@ -44,7 +45,7 @@ const Profile = () => {
   const [selectedTicker, setSelectedTicker] = useState(null);
   const [dayHistory, setDayHistory] = useState([]);
   const { currentUser, logout } = useAuth();
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   const handleTickerAdded = () => {
     // Handle any additional logic after a ticker is added
@@ -70,6 +71,7 @@ const Profile = () => {
         );
         setTickers(response.data.tickers);
         setPortfolioValue(response.data.total_portfolio_value);
+        setOwned(response.data.years_owned || 0); // Set Owned to 0 if no value is found
       } catch (error) {
         console.error('Error fetching tickers:', error.response ? error.response.data : error.message);
       }
@@ -102,10 +104,10 @@ const Profile = () => {
     fetchDayHistory();
   }, [currentUser]);
 
-  const handleLogout = async () => {
-    await logout();
-    navigate('/Home');
-  };
+  // const handleLogout = async () => {
+  //   navigate('/Home');
+  //   await logout();
+  // };
 
   const handleOwnedUpdated = (yearsOwned) => {
     setOwned(yearsOwned);
@@ -117,8 +119,8 @@ const Profile = () => {
       {
         label: 'Day History',
         data: dayHistory.map(entry => entry.value),
-        borderColor: 'rgb(86, 144, 144)',
-        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+        borderColor: 'rgb(22, 67, 34)',
+        backgroundColor: 'rgb(22, 67, 34, 0.2 )',
         fill: true,
       },
     ],
@@ -141,15 +143,20 @@ const Profile = () => {
   return (
     <div>
       <Header />
-      <Container>
+      <Container className="full-height">
         <Row>
           <Col sm={8}>
             <div className="line-chart-container">
               <Line data={chartData} options={chartOptions} />
             </div>
-            <div>
-              {PortfolioValue && <h3>Portfolio Value: ${PortfolioValue.toFixed(2)}</h3>}
-            </div>
+            <Row>
+              <Col>
+                <div>
+                  {PortfolioValue && <div className="account-text">Portfolio Value: ${PortfolioValue.toFixed(2)}</div>}
+                </div>
+              </Col>
+              <Col/>
+            </Row>
           </Col>
           <Col sm={4}>
             <br/>

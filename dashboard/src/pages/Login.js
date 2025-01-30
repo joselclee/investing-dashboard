@@ -30,7 +30,7 @@ const Login = () => {
   return (
     <div>
       <Header />
-      <Container>
+      <Container className="full-height">
         <Row className="justify-content-center align-items-center" style={{ height: '100vh' }}>
           <Col xs={12} md={4}>
             <h1 className="account-text">Login to your account</h1>
