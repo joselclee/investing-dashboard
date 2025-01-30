@@ -25,6 +25,12 @@
     color: black !important;
     border-color: #112A46 !important;
 }
+
+.button-two:hover {
+    background-color: white !important;
+    color: #112A46 !important;
+    border-color: #112A46 !important;
+}
 .button-rm {
     background-color: #791e1e !important;
     color: white !important;

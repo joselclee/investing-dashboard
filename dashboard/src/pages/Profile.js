@@ -1,15 +1,38 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Button, ListGroup } from 'react-bootstrap';
-import { Pie } from 'react-chartjs-2';
+import { Line } from 'react-chartjs-2';
 import axios from 'axios';
 import { useAuth } from '../API/authContext';
 import { useNavigate } from 'react-router-dom';
+import {
+  Chart as ChartJS,
+  LineElement,
+  PointElement,
+  LinearScale,
+  Title,
+  CategoryScale,
+  TimeScale,
+  TimeSeriesScale,
+  Filler,
+} from 'chart.js';
+import 'chartjs-adapter-date-fns';
 
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import AddTicker from '../components/AddTicker';
 import EditTicker from '../components/EditTicker';
 import UpdateOwned from '../components/UpdateOwned';
+
+ChartJS.register(
+  LineElement,
+  PointElement,
+  LinearScale,
+  Title,
+  CategoryScale,
+  TimeScale,
+  TimeSeriesScale,
+  Filler
+);
 
 const Profile = () => {
   const [showAddTickerModal, setShowAddTickerModal] = useState(false);
@@ -19,6 +42,7 @@ const Profile = () => {
   const [PortfolioValue, setPortfolioValue] = useState(null);
   const [Owned, setOwned] = useState(null);
   const [selectedTicker, setSelectedTicker] = useState(null);
+  const [dayHistory, setDayHistory] = useState([]);
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -52,8 +76,30 @@ const Profile = () => {
     }
   };
 
+  const fetchDayHistory = async () => {
+    if (currentUser) {
+      try {
+        const idToken = await currentUser.getIdToken();
+        const userId = currentUser.uid;
+        const response = await axios.get(
+          `http://localhost:5000/api/v1/day-history/${userId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${idToken}`,
+            },
+          }
+        );
+        console.log('Response:', response.data);
+        setDayHistory(Object.entries(response.data.portfolio_performance).map(([time, value]) => ({ time, value })));
+      } catch (error) {
+        console.error('Error fetching day history:', error.response ? error.response.data : error.message);
+      }
+    }
+  };
+
   useEffect(() => {
     fetchTickers();
+    fetchDayHistory();
   }, [currentUser]);
 
   const handleLogout = async () => {
@@ -66,13 +112,30 @@ const Profile = () => {
   };
 
   const chartData = {
-    labels: tickers.map(ticker => ticker.ticker),
+    labels: dayHistory.map(entry => entry.time),
     datasets: [
       {
-        data: tickers.map(ticker => ticker.value),
-        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'],
+        label: 'Day History',
+        data: dayHistory.map(entry => entry.value),
+        borderColor: 'rgb(86, 144, 144)',
+        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+        fill: true,
       },
     ],
+  };
+
+  const chartOptions = {
+    scales: {
+      x: {
+        type: 'time',
+        time: {
+          unit: 'minute',
+        },
+      },
+      y: {
+        beginAtZero: false,
+      },
+    },
   };
 
   return (
@@ -80,48 +143,30 @@ const Profile = () => {
       <Header />
       <Container>
         <Row>
-          <Col>
-            <Row>
-              <h3>Profile</h3>
-            </Row>
-            <Row>
-              <Button className="button-one" onClick={() => setShowUpdateOwnedModal(true)}>
-                Update Account
-              </Button>
-            </Row>
-          </Col>
-          <Col/>
-          <Col>
-            <div className="pie-chart-container">
-              <Pie data={chartData} />
+          <Col sm={8}>
+            <div className="line-chart-container">
+              <Line data={chartData} options={chartOptions} />
             </div>
             <div>
               {PortfolioValue && <h3>Portfolio Value: ${PortfolioValue.toFixed(2)}</h3>}
             </div>
           </Col>
-        </Row>
-        <br/>
-        <Row>
-        <Col/>
-        <Col/>
-        <Col>
-        <br/>
-          <div className="container">
-            <Button className="button-one" onClick={() => setShowAddTickerModal(true)}>
-              Add Ticker
-            </Button>
-            <Button onClick={handleLogout} className="ms-2 button-rm">
-              Logout
-            </Button>
-            <AddTicker
-              show={showAddTickerModal}
-              handleClose={() => setShowAddTickerModal(false)}
-              onTickerAdded={handleTickerAdded}
-            />
-            <br/><br/>
-            <ListGroup>
-              {tickers.map((ticker) => (
-                <ListGroup.Item key={ticker.ticker}>
+          <Col sm={4}>
+            <br/>
+            <div style={{ width: '100%' }}>
+              <Button className="button-two" onClick={() => setShowAddTickerModal(true)} style={{ width: '100%' }}>
+                Add Ticker
+              </Button>
+              <AddTicker
+                show={showAddTickerModal}
+                handleClose={() => setShowAddTickerModal(false)}
+                onTickerAdded={handleTickerAdded}
+              />
+            </div>
+            <br/>
+            <ListGroup style={{ width: '100%' }}>
+              {tickers.map((ticker, index) => (
+                <ListGroup.Item key={`${ticker.ticker}-${index}`}>
                   {ticker.ticker} - {ticker.value} shares
                   <Button
                     size="sm"
@@ -135,28 +180,26 @@ const Profile = () => {
                   </Button>
                 </ListGroup.Item>
               ))}
-              </ListGroup>
-              {selectedTicker && (
-                <EditTicker
-                  show={showEditTickerModal}
-                 handleClose={() => setShowEditTickerModal(false)}
-                 ticker={selectedTicker}
-                 onTickerUpdated={fetchTickers}
-                />
-              )}
-              <UpdateOwned
-                show={showUpdateOwnedModal}
-                handleClose={() => setShowUpdateOwnedModal(false)}
-                onOwnedUpdated={handleOwnedUpdated}
+            </ListGroup>
+            {selectedTicker && (
+              <EditTicker
+                show={showEditTickerModal}
+                handleClose={() => setShowEditTickerModal(false)}
+                ticker={selectedTicker}
+                onTickerUpdated={fetchTickers}
               />
-            </div>
+            )}
+            <UpdateOwned
+              show={showUpdateOwnedModal}
+              handleClose={() => setShowUpdateOwnedModal(false)}
+              onOwnedUpdated={handleOwnedUpdated}
+            />
           </Col>
         </Row>
-        <br/><br/>
       </Container>
       <Footer />
     </div>
   );
 };
 
-export default Profile; 
+export default Profile;
