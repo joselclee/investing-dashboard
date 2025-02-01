@@ -3,7 +3,6 @@ import { Container, Row, Col, Button, ListGroup } from 'react-bootstrap';
 import { Line } from 'react-chartjs-2';
 import axios from 'axios';
 import { useAuth } from '../API/authContext';
-import { useNavigate } from 'react-router-dom';
 import './Page.css';
 import {
   Chart as ChartJS,
@@ -22,7 +21,6 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import AddTicker from '../components/AddTicker';
 import EditTicker from '../components/EditTicker';
-import UpdateOwned from '../components/UpdateOwned';
 
 ChartJS.register(
   LineElement,
@@ -38,22 +36,15 @@ ChartJS.register(
 const Profile = () => {
   const [showAddTickerModal, setShowAddTickerModal] = useState(false);
   const [showEditTickerModal, setShowEditTickerModal] = useState(false);
-  const [showUpdateOwnedModal, setShowUpdateOwnedModal] = useState(false);
-  const [tickers, setTickers] = useState([]);
-  const [PortfolioValue, setPortfolioValue] = useState(null);
-  const [Owned, setOwned] = useState(null);
   const [selectedTicker, setSelectedTicker] = useState(null);
   const [dayHistory, setDayHistory] = useState([]);
-  const { currentUser, logout } = useAuth();
-  // const navigate = useNavigate();
+  const { currentUser, accountDetails, setAccountDetails } = useAuth();
 
   const handleTickerAdded = () => {
-    // Handle any additional logic after a ticker is added
-    console.log('Ticker added successfully');
-    fetchTickers();
+    fetchAccountDetails();
   };
 
-  const fetchTickers = async () => {
+  const fetchAccountDetails = async () => {
     if (currentUser) {
       try {
         const idToken = await currentUser.getIdToken();
@@ -64,16 +55,20 @@ const Profile = () => {
             headers: {
               Authorization: `Bearer ${idToken}`,
             },
-            params: {
-              user_id: userId,
-            },
           }
         );
-        setTickers(response.data.tickers);
-        setPortfolioValue(response.data.total_portfolio_value);
-        setOwned(response.data.years_owned || 0); // Set Owned to 0 if no value is found
+        setAccountDetails({
+          firstName: response.data.first_name,
+          lastName: response.data.last_name,
+          stateOfResidence: response.data.state_of_residence,
+          yearsOwned: response.data.years_owned,
+          startDate: response.data.start_date,
+          tickers: response.data.tickers,
+          totalPortfolioValue: response.data.total_portfolio_value,
+          tickerPercentages: response.data.ticker_percentages,
+        });
       } catch (error) {
-        console.error('Error fetching tickers:', error.response ? error.response.data : error.message);
+        console.error('Error fetching account details:', error.response ? error.response.data : error.message);
       }
     }
   };
@@ -91,7 +86,6 @@ const Profile = () => {
             },
           }
         );
-        console.log('Response:', response.data);
         setDayHistory(Object.entries(response.data.portfolio_performance).map(([time, value]) => ({ time, value })));
       } catch (error) {
         console.error('Error fetching day history:', error.response ? error.response.data : error.message);
@@ -100,18 +94,8 @@ const Profile = () => {
   };
 
   useEffect(() => {
-    fetchTickers();
     fetchDayHistory();
   }, [currentUser]);
-
-  // const handleLogout = async () => {
-  //   navigate('/Home');
-  //   await logout();
-  // };
-
-  const handleOwnedUpdated = (yearsOwned) => {
-    setOwned(yearsOwned);
-  };
 
   const chartData = {
     labels: dayHistory.map(entry => entry.time),
@@ -150,10 +134,10 @@ const Profile = () => {
               <Line data={chartData} options={chartOptions} />
             </div>
             <Row>
-              <Col>
-                <div>
-                  {PortfolioValue && <div className="account-text">Portfolio Value: ${PortfolioValue.toFixed(2)}</div>}
-                </div>
+              <Col className="account-text">
+                <div>{accountDetails?.totalPortfolioValue && <div>Portfolio Value: ${accountDetails.totalPortfolioValue.toFixed(2)}</div>}</div>
+                <div>{accountDetails?.yearsOwned && <div>Years owned: {accountDetails.yearsOwned}</div>}</div>
+                <div>State of Residence: {accountDetails ? accountDetails.stateOfResidence : ''}</div>
               </Col>
               <Col/>
             </Row>
@@ -172,7 +156,7 @@ const Profile = () => {
             </div>
             <br/>
             <ListGroup style={{ width: '100%' }}>
-              {tickers.map((ticker, index) => (
+              {accountDetails?.tickers.map((ticker, index) => (
                 <ListGroup.Item key={`${ticker.ticker}-${index}`}>
                   {ticker.ticker} - {ticker.value} shares
                   <Button
@@ -193,14 +177,9 @@ const Profile = () => {
                 show={showEditTickerModal}
                 handleClose={() => setShowEditTickerModal(false)}
                 ticker={selectedTicker}
-                onTickerUpdated={fetchTickers}
+                onTickerUpdated={fetchAccountDetails}
               />
             )}
-            <UpdateOwned
-              show={showUpdateOwnedModal}
-              handleClose={() => setShowUpdateOwnedModal(false)}
-              onOwnedUpdated={handleOwnedUpdated}
-            />
           </Col>
         </Row>
       </Container>

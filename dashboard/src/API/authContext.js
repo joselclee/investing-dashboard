@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'firebase/auth';
+import axios from 'axios';
 import { auth } from './firebaseConfig';
 
 const AuthContext = createContext();
@@ -8,22 +9,55 @@ export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
+  const [accountDetails, setAccountDetails] = useState(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setCurrentUser(user);
+      if (user) {
+        const idToken = await user.getIdToken();
+        const userId = user.uid;
+        const response = await axios.get(
+          `http://localhost:5000/api/v1/account/${userId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${idToken}`,
+            },
+          }
+        );
+        console.log('Account details:', response.data);
+        setAccountDetails({
+          firstName: response.data.first_name,
+          lastName: response.data.last_name,
+          stateOfResidence: response.data.state_of_residence,
+          yearsOwned: response.data.years_owned,
+          startDate: response.data.start_date,
+          tickers: response.data.tickers,
+          totalPortfolioValue: response.data.total_portfolio_value,
+          tickerPercentages: response.data.ticker_percentages,
+        });
+      } else {
+        setAccountDetails(null);
+      }
     });
     return unsubscribe;
   }, []);
 
-  const login = (email, password) => signInWithEmailAndPassword(auth, email, password);
-  const logout = () => signOut(auth);
+  const login = async (email, password) => {
+    await signInWithEmailAndPassword(auth, email, password);
+  };
+
+  const logout = async () => {
+    await signOut(auth);
+    setAccountDetails(null);
+  };
 
   const value = {
     currentUser,
     login,
     logout,
-    auth, // Ensure auth is included in the context value
+    accountDetails,
+    setAccountDetails,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

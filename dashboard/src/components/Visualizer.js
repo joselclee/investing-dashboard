@@ -27,7 +27,7 @@ const Visualizer = ({ data }) => {
     labels: normalDistributionData.map(point => point.x.toFixed(2)),
     datasets: [
       {
-        label: 'Normal Distribution',
+        label: 'Distribution',
         data: normalDistributionData.map(point => point.y),
         borderColor: 'rgba(40, 40, 134, 0.75)',
         backgroundColor: 'rgba(75,192,192,0.2)',
@@ -84,7 +84,7 @@ const Visualizer = ({ data }) => {
     <div className="graph-container">
       <Line data={chartData} options={options} />
       <div className="var-value">
-        <strong>Most Likely VaR:</strong> {varValue}
+        <strong>Most probable value at risk:</strong> ${Math.abs(varValue)}
       </div>
     </div>
   );

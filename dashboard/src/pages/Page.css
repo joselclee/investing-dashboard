@@ -1,6 +1,7 @@
 /* Height/Width modifiers */
 .full-height {
-  height: 110vh;
+  padding-top: 20px !important;
+  padding-bottom: 60px !important;
 }
 /* Text */
 .account-text {

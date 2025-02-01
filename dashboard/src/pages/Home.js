@@ -9,7 +9,7 @@ const Home = () => {
   return (
     <div>
         <Header />
-        <Container className="full-height">
+        <Container fluid className="full-height">
           <Row>
             <Col>
               <Graph />

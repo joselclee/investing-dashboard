@@ -18,3 +18,18 @@
   .slide-out-tab-content {
     padding: 20px;
   }
+
+  .slide-out-tab-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 20px;
+  }
+  
+  .slide-out-tab-content .top-buttons {
+    flex-grow: 1;
+  }
+  
+  .slide-out-tab-content .bottom-buttons {
+    margin-top: auto;
+  }

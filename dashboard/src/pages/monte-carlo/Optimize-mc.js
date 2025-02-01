@@ -1,28 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import Visualizer from '../components/Visualizer';
-import { Container, Row, Col, Form, Button } from 'react-bootstrap';
+import { Container, Row, Col, Form, Button, OverlayTrigger, Tooltip as BootstrapTooltip } from 'react-bootstrap';
 import axios from 'axios';
+import { Pie } from 'react-chartjs-2';
+import { Chart as ChartJS, ArcElement, Tooltip as ChartTooltip, Legend } from 'chart.js';
 import { animateScroll as scroll } from 'react-scroll';
 import { useAuth } from '../API/authContext';
 import './Page.css';
 
-const Var = () => {
+ChartJS.register(ArcElement, ChartTooltip, Legend);
+
+const Optimize = () => {
   const initialFormData = {
-    years: '',
     portfolio_value: '',
-    days: '',
-    confidence_level: 0.95,
+    tickers: [''],
     weights: [''],
-    tickers: ['']
+    years: '',
+    start_date: '2020-01-01',
+    end_date: '2023-01-01',
+    num_scenarios: 1000
   };
 
   const [formData, setFormData] = useState(initialFormData);
   const [isDollar, setIsDollar] = useState(false);
-  const [responseData, setResponseData] = useState([]);
+  const [oldPortfolio, setOldPortfolio] = useState({ tickers: [], weights: [] });
+  const [newPortfolio, setNewPortfolio] = useState({ tickers: [], weights: [] });
   const [isGraphVisible, setIsGraphVisible] = useState(false);
-  const { currentUser, accountDetails } = useAuth();
+  const { currentUser } = useAuth();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -70,23 +75,28 @@ const Var = () => {
     }
   };
 
-  const convertToDecimalWeights = () => {
-    const totalPortfolioValue = parseFloat(formData.portfolio_value);
-    return formData.weights.map(weight => (parseFloat(weight) / totalPortfolioValue).toFixed(2));
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const formattedData = {
-      ...formData,
-      weights: isDollar ? convertToDecimalWeights() : formData.weights.map(weight => (parseFloat(weight) / 100).toFixed(2))
+    const tickerWeights = formData.tickers.map((ticker, index) => ({
+      ticker,
+      weight: parseFloat(formData.weights[index]) / 100
+    }));
+    const payload = {
+      ticker_weights: tickerWeights,
+      start_date: formData.start_date,
+      end_date: formData.end_date,
+      num_scenarios: formData.num_scenarios
     };
     try {
-      const response = await axios.post('http://localhost:5000/api/v1/monte-carlo-var', formattedData);
-      setResponseData(response.data.scenario_return);
+      const response = await axios.post('http://localhost:5000/api/v1/optimize/monte-carlo', payload);
+      console.log('Response:', response.data);
+      const optimizedWeights = response.data.optimized_weights;
+      setNewPortfolio({
+        tickers: Object.keys(optimizedWeights),
+        weights: Object.values(optimizedWeights).map(weight => (weight * 100).toFixed(2))
+      });
       setIsGraphVisible(true);
       scroll.scrollToBottom();
-      console.log('Response:', response.data);
     } catch (error) {
       console.error('Error:', error);
     }
@@ -97,43 +107,84 @@ const Var = () => {
     setIsGraphVisible(false);
   };
 
-  const handleAutofill = () => {
-    if (currentUser && accountDetails) {
-      const tickers = accountDetails.tickerPercentages.map(ticker => ticker.ticker);
-      const weights = accountDetails.tickerPercentages.map(ticker => ticker.percentage.toFixed(2));
-      const portfolioValue = accountDetails.totalPortfolioValue;
-      const yearsOwned = accountDetails.yearsOwned;
-      setFormData({
-        ...formData,
-        tickers,
-        weights,
-        portfolio_value: portfolioValue.toFixed(2),
-        years: yearsOwned
-      });
-      console.log('Autofill:', accountDetails);
+  const handleAutofill = async () => {
+    if (currentUser) {
+      try {
+        const idToken = await currentUser.getIdToken();
+        const userId = currentUser.uid;
+        const response = await axios.get(
+          `http://localhost:5000/api/v1/account/${userId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${idToken}`,
+            },
+            params: {
+              user_id: userId,
+            },
+          }
+        );
+        const tickers = response.data.ticker_percentages.map(ticker => ticker.ticker);
+        const weights = response.data.ticker_percentages.map(ticker => ticker.percentage.toFixed(2));
+        const portfolioValue = response.data.total_portfolio_value;
+        const yearsOwned = response.data.years_owned;
+        setFormData({
+          ...formData,
+          tickers,
+          weights,
+          portfolio_value: portfolioValue.toFixed(2),
+          years: yearsOwned
+        });
+        setOldPortfolio({ tickers, weights });
+        console.log('Autofill:', response.data);
+      } catch (error) {
+        console.error('Error fetching tickers:', error.response ? error.response.data : error.message);
+      }
     }
+  };
+
+  const generateChartData = (portfolio) => {
+    if (!portfolio || !portfolio.tickers || !portfolio.weights) {
+      return {
+        labels: [],
+        datasets: [
+          {
+            data: [],
+            backgroundColor: [],
+          },
+        ],
+      };
+    }
+
+    return {
+      labels: portfolio.tickers,
+      datasets: [
+        {
+          data: portfolio.weights.map(weight => parseFloat(weight)),
+          backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'],
+        },
+      ],
+    };
+  };
+
+  const chartOptions = {
+    animation: {
+      duration: 1000,
+      easing: 'easeInOutQuad',
+      animateRotate: true,
+    },
+    maintainAspectRatio: false,
   };
 
   return (
     <div>
       <Header />
-      <Container className="full-height">
+      <Container fluid className="full-height">
         <br/>
         <br/>
         <Row className="left-align">
         <Col />
           <Col>
             <Form onSubmit={handleSubmit}>
-              <Form.Group controlId="years">
-                <Form.Label>Years</Form.Label>
-                <Form.Control
-                  type="number"
-                  name="years"
-                  value={formData.years}
-                  onChange={handleChange}
-                />
-              </Form.Group>
-              <br/>
               <Form.Group controlId="portfolio_value">
                 <Form.Label>Portfolio Value</Form.Label>
                 <Form.Control
@@ -144,25 +195,48 @@ const Var = () => {
                 />
               </Form.Group>
               <br/>
-              <Form.Group controlId="days">
-                <Form.Label>Days</Form.Label>
+              <Form.Group controlId="years">
+                <OverlayTrigger
+                  placement="top"
+                  overlay={<BootstrapTooltip id="tooltip-years">Number of years of past performance to include for decision</BootstrapTooltip>}
+                >
+                  <Form.Label>Years</Form.Label>
+                </OverlayTrigger>
                 <Form.Control
                   type="number"
-                  name="days"
-                  value={formData.days}
+                  name="years"
+                  value={formData.years}
                   onChange={handleChange}
                 />
               </Form.Group>
               <br/>
-              <Form.Group controlId="confidence_level">
-                <Form.Label>Confidence Level: {formData.confidence_level} ( &alpha;= {(1 - formData.confidence_level).toFixed(2)} )</Form.Label>
-                <Form.Range
-                  name="confidence_level"
-                  value={formData.confidence_level}
+              <Form.Group controlId="start_date">
+                <Form.Label>Start Date</Form.Label>
+                <Form.Control
+                  type="date"
+                  name="start_date"
+                  value={formData.start_date}
                   onChange={handleChange}
-                  min="0"
-                  max="1"
-                  step="0.01"
+                />
+              </Form.Group>
+              <br/>
+              <Form.Group controlId="end_date">
+                <Form.Label>End Date</Form.Label>
+                <Form.Control
+                  type="date"
+                  name="end_date"
+                  value={formData.end_date}
+                  onChange={handleChange}
+                />
+              </Form.Group>
+              <br/>
+              <Form.Group controlId="num_scenarios">
+                <Form.Label>Number of Scenarios</Form.Label>
+                <Form.Control
+                  type="number"
+                  name="num_scenarios"
+                  value={formData.num_scenarios}
+                  onChange={handleChange}
                 />
               </Form.Group>
               <br/>
@@ -184,11 +258,11 @@ const Var = () => {
                       <Form.Group controlId={`weight-${index}`}>
                         <Form.Control
                           type="number"
-                          placeholder={isDollar ? "Weight ($)" : "Weight (%)"}
+                          placeholder="Weight (%)"
                           value={formData.weights[index]}
                           onChange={(e) => handleWeightChange(index, e.target.value)}
                           min="0"
-                          max={isDollar ? formData.portfolio_value : "100"}
+                          max="100"
                           step="0.01"
                         />
                       </Form.Group>
@@ -233,7 +307,18 @@ const Var = () => {
           <Col />
           <Row>
           <Col>
-            {isGraphVisible && <Visualizer data={responseData} />}
+            {isGraphVisible && (
+              <div>
+                <h3>Old Portfolio</h3>
+                <div className="pie-chart-container">
+                  <Pie data={generateChartData(oldPortfolio)} options={chartOptions} />
+                </div>
+                <h3>New Portfolio</h3>
+                <div className="pie-chart-container">
+                  <Pie data={generateChartData(newPortfolio)} options={chartOptions} />
+                </div>
+              </div>
+            )}
           </Col>
           </Row>
         </Row>
@@ -243,4 +328,4 @@ const Var = () => {
   );
 };
 
-export default Var;
+export default Optimize;

@@ -16,7 +16,8 @@ const Optimize = () => {
     portfolio_value: '',
     tickers: [''],
     weights: [''],
-    years: ''
+    start_date: '2020-01-01',
+    end_date: '2023-01-01'
   };
 
   const [formData, setFormData] = useState(initialFormData);
@@ -24,7 +25,7 @@ const Optimize = () => {
   const [oldPortfolio, setOldPortfolio] = useState({ tickers: [], weights: [] });
   const [newPortfolio, setNewPortfolio] = useState({ tickers: [], weights: [] });
   const [isGraphVisible, setIsGraphVisible] = useState(false);
-  const { currentUser } = useAuth();
+  const { currentUser, accountDetails } = useAuth();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -74,19 +75,29 @@ const Optimize = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const formattedData = {
-      ...formData,
-      weights: isDollar ? formData.weights.map(weight => (parseFloat(weight) / parseFloat(formData.portfolio_value)).toFixed(2)) : formData.weights.map(weight => (parseFloat(weight) / 100).toFixed(2))
+    const tickerWeights = formData.tickers.map((ticker, index) => ({
+        ticker,
+        weight: parseFloat(formData.weights[index]) / 100
+    }));
+    const payload = {
+        ticker_weights: tickerWeights,
+        start_date: formData.start_date,
+        end_date: formData.end_date,
+        num_scenarios: 10000 // Default to 10,000 simulations
     };
+    console.log('Payload:', payload); // Debugging
     try {
-      const response = await axios.post('http://localhost:5000/api/v1/optimize-portfolio', formattedData);
-      console.log('Response:', response.data); 
-      setOldPortfolio({ tickers: formData.tickers, weights: formattedData.weights });
-      setNewPortfolio({ tickers: formData.tickers, weights: response.data.optimal_weights });
-      setIsGraphVisible(true);
-      scroll.scrollToBottom();
+        const response = await axios.post('http://localhost:5000/api/v1/optimize/monte-carlo', payload);
+        console.log('Response:', response.data);
+        const optimizedWeights = response.data.optimized_weights;
+        setNewPortfolio({
+            tickers: Object.keys(optimizedWeights),
+            weights: Object.values(optimizedWeights).map(weight => (weight * 100).toFixed(2))
+        });
+        setIsGraphVisible(true);
+        scroll.scrollToBottom();
     } catch (error) {
-      console.error('Error:', error);
+        console.error('Error:', error);
     }
   };
 
@@ -95,32 +106,21 @@ const Optimize = () => {
     setIsGraphVisible(false);
   };
 
-  const handleAutofill = async () => {
-    if (currentUser) {
-      try {
-        const idToken = await currentUser.getIdToken();
-        const userId = currentUser.uid;
-        const response = await axios.get(
-          `http://localhost:5000/api/v1/account/${userId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${idToken}`,
-            },
-            params: {
-              user_id: userId,
-            },
-          }
-        );
-        const tickers = response.data.tickers.map(ticker => ticker.ticker);
-        const weights = response.data.tickers.map(ticker => ticker.value);
-        setFormData({
-          ...formData,
-          tickers,
-          weights
-        });
-      } catch (error) {
-        console.error('Error fetching tickers:', error.response ? error.response.data : error.message);
-      }
+  const handleAutofill = () => {
+    if (currentUser && accountDetails) {
+      const tickers = accountDetails.tickerPercentages.map(ticker => ticker.ticker);
+      const weights = accountDetails.tickerPercentages.map(ticker => ticker.percentage.toFixed(2));
+      const portfolioValue = accountDetails.totalPortfolioValue;
+      const yearsOwned = accountDetails.yearsOwned;
+      setFormData({
+        ...formData,
+        tickers,
+        weights,
+        portfolio_value: portfolioValue.toFixed(2),
+        years: yearsOwned
+      });
+      setOldPortfolio({ tickers, weights });
+      console.log('Autofill:', accountDetails);
     }
   };
 
@@ -141,7 +141,7 @@ const Optimize = () => {
       labels: portfolio.tickers,
       datasets: [
         {
-          data: portfolio.weights.map(weight => parseFloat(weight) * 100),
+          data: portfolio.weights.map(weight => parseFloat(weight)),
           backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'],
         },
       ],
@@ -177,17 +177,22 @@ const Optimize = () => {
                 />
               </Form.Group>
               <br/>
-              <Form.Group controlId="years">
-                <OverlayTrigger
-                  placement="top"
-                  overlay={<BootstrapTooltip id="tooltip-years">Number of years of past performance to include for decision</BootstrapTooltip>}
-                >
-                  <Form.Label>Years</Form.Label>
-                </OverlayTrigger>
+              <Form.Group controlId="start_date">
+                <Form.Label>Start Date</Form.Label>
                 <Form.Control
-                  type="number"
-                  name="years"
-                  value={formData.years}
+                  type="date"
+                  name="start_date"
+                  value={formData.start_date}
+                  onChange={handleChange}
+                />
+              </Form.Group>
+              <br/>
+              <Form.Group controlId="end_date">
+                <Form.Label>End Date</Form.Label>
+                <Form.Control
+                  type="date"
+                  name="end_date"
+                  value={formData.end_date}
                   onChange={handleChange}
                 />
               </Form.Group>
@@ -210,11 +215,11 @@ const Optimize = () => {
                       <Form.Group controlId={`weight-${index}`}>
                         <Form.Control
                           type="number"
-                          placeholder={isDollar ? "Weight ($)" : "Weight (%)"}
+                          placeholder="Weight (%)"
                           value={formData.weights[index]}
                           onChange={(e) => handleWeightChange(index, e.target.value)}
                           min="0"
-                          max={isDollar ? formData.portfolio_value : "100"}
+                          max="100"
                           step="0.01"
                         />
                       </Form.Group>

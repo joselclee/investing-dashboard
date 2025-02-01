@@ -4,16 +4,18 @@ import { useAuth } from '../API/authContext';
 import axios from 'axios';
 import './SlideOutTab.css';
 import { useNavigate } from 'react-router-dom';
+import UpdateAccount from './UpdateAccount';
 
 const SlideOutTab = ({ show, handleClose }) => {
-  const { currentUser, logout } = useAuth();
+  const { currentUser, logout, accountDetails } = useAuth();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showUpdateAccountModal, setShowUpdateAccountModal] = useState(false);
 
   const navigate = useNavigate();
 
   const handleLogout = async () => {
     await logout();
-    navigate('/Home')
+    navigate('/Home');
     handleClose();
   };
 
@@ -38,25 +40,36 @@ const SlideOutTab = ({ show, handleClose }) => {
     }
   };
 
+  const handleUpdateAccount = () => {
+    setShowUpdateAccountModal(true);
+  };
+
   return (
     <div className={`slide-out-tab ${show ? 'show' : ''}`}>
       <div className="slide-out-tab-content">
-        <br/>
-        <div className="account-text">
-            Hello, {currentUser ? currentUser.email : 'Guest'} {/*Replace with username when implemented*/}
+        <div className="top-buttons">
+          <div className="account-text">
+            Welcome back, {accountDetails ? accountDetails.firstName : 'Guest'}
+          </div>
+          <br/><br/>
+          <Button className="button-two" href="/Profile" style={{ width: '100%', marginBottom: '10px' }}>
+            Go to Account
+          </Button>
+          <Button className="button-two" onClick={handleUpdateAccount} style={{ width: '100%', marginBottom: '10px' }}>
+            Update Account
+          </Button>
+          <Button className="button-one" onClick={handleClose} style={{ width: '100%', marginBottom: '10px' }}>
+            Close
+          </Button>
         </div>
-        <br/><br/>
-        <Button className="button-two" onClick={handleLogout} style={{ width: '100%', marginBottom: '10px' }}>
-          Logout
-        </Button>
-        <br/><br/>
-        <Button className="button-one" onClick={handleClose} style={{ width: '100%', marginTop: '10px' }}>
-          Close
-        </Button>
-        <br/><br/>
-        <Button className="button-rm" onClick={() => setShowDeleteConfirm(true)} style={{ width: '100%' }}>
-          Delete Account
-        </Button>
+        <div className="bottom-buttons">
+          <Button className="button-two" onClick={handleLogout} style={{ width: '100%', marginBottom: '10px' }}>
+            Logout
+          </Button>
+          <Button className="button-rm" onClick={() => setShowDeleteConfirm(true)} style={{ width: '100%' }}>
+            Delete Account
+          </Button>
+        </div>
       </div>
 
       <Modal show={showDeleteConfirm} onHide={() => setShowDeleteConfirm(false)}>
@@ -67,14 +80,21 @@ const SlideOutTab = ({ show, handleClose }) => {
           Are you sure you want to delete your account? This action cannot be undone.
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowDeleteConfirm(false)}>
+          <Button className="button-one" onClick={() => setShowDeleteConfirm(false)}>
             Cancel
           </Button>
-          <Button variant="danger" onClick={handleDeleteAccount}>
+          <Button className="button-rm" onClick={handleDeleteAccount}>
             Delete
           </Button>
         </Modal.Footer>
       </Modal>
+
+      <UpdateAccount
+        show={showUpdateAccountModal}
+        handleClose={() => setShowUpdateAccountModal(false)}
+        onOwnedUpdated={() => {}}
+        accountDetails={accountDetails}
+      />
     </div>
   );
 };
