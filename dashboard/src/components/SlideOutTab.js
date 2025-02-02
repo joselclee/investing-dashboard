@@ -25,7 +25,7 @@ const SlideOutTab = ({ show, handleClose }) => {
         const idToken = await currentUser.getIdToken();
         const userId = currentUser.uid;
         await axios.delete(
-          `http://localhost:5000/api/v1/delete-account/${userId}`,
+          `https://ec2-3-94-107-189.compute-1.amazonaws.com:5000/api/v1/delete-account/${userId}`,
           {
             headers: {
               Authorization: `Bearer ${idToken}`,

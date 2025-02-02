@@ -31,7 +31,7 @@ const UpdateAccount = ({ show, handleClose, onOwnedUpdated, accountDetails }) =>
           start_date: startDate,
         };
         await axios.put(
-          `http://localhost:5000/api/v1/account/${userId}/update-account`,
+          `https://ec2-3-94-107-189.compute-1.amazonaws.com:5000/api/v1/account/${userId}/update-account`,
           data,
           {
             headers: {

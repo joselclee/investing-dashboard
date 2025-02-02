@@ -19,7 +19,7 @@ const EditTicker = ({ show, handleClose, ticker, onTickerUpdated }) => {
         const idToken = await currentUser.getIdToken();
         const userId = currentUser.uid;
         await axios.put(
-          'http://localhost:5000/api/v1/update-ticker-value',
+          'https://ec2-3-94-107-189.compute-1.amazonaws.com:5000/api/v1/update-ticker-value',
           {
             user_id: userId,
             ticker: ticker.ticker,
