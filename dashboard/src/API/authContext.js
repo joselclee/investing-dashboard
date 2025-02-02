@@ -18,7 +18,7 @@ export const AuthProvider = ({ children }) => {
         const idToken = await user.getIdToken();
         const userId = user.uid;
         const response = await axios.get(
-          `http://localhost:5000/api/v1/account/${userId}`,
+          `https://ec2-3-94-107-189.compute-1.amazonaws.com:5000/api/v1/account/${userId}`,
           {
             headers: {
               Authorization: `Bearer ${idToken}`,
