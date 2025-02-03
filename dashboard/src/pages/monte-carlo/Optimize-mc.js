@@ -88,7 +88,7 @@ const Optimize = () => {
       num_scenarios: formData.num_scenarios
     };
     try {
-      const response = await axios.post('https://ec2-3-94-107-189.compute-1.amazonaws.com:5000/api/v1/optimize/monte-carlo', payload);
+      const response = await axios.post('http://ec2-3-94-107-189.compute-1.amazonaws.com:5000/api/v1/optimize/monte-carlo', payload);
       console.log('Response:', response.data);
       const optimizedWeights = response.data.optimized_weights;
       setNewPortfolio({
@@ -113,7 +113,7 @@ const Optimize = () => {
         const idToken = await currentUser.getIdToken();
         const userId = currentUser.uid;
         const response = await axios.get(
-          `https://ec2-3-94-107-189.compute-1.amazonaws.com:5000/api/v1/account/${userId}`,
+          `http://ec2-3-94-107-189.compute-1.amazonaws.com:5000/api/v1/account/${userId}`,
           {
             headers: {
               Authorization: `Bearer ${idToken}`,

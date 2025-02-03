@@ -50,7 +50,7 @@ const Profile = () => {
         const idToken = await currentUser.getIdToken();
         const userId = currentUser.uid;
         const response = await axios.get(
-          `https://ec2-3-94-107-189.compute-1.amazonaws.com:5000/api/v1/account/${userId}`,
+          `http://ec2-3-94-107-189.compute-1.amazonaws.com:5000/api/v1/account/${userId}`,
           {
             headers: {
               Authorization: `Bearer ${idToken}`,
@@ -79,7 +79,7 @@ const Profile = () => {
         const idToken = await currentUser.getIdToken();
         const userId = currentUser.uid;
         const response = await axios.get(
-          `https://ec2-3-94-107-189.compute-1.amazonaws.com:5000/api/v1/day-history/${userId}`,
+          `http://ec2-3-94-107-189.compute-1.amazonaws.com:5000/api/v1/day-history/${userId}`,
           {
             headers: {
               Authorization: `Bearer ${idToken}`,
