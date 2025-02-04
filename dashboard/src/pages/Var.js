@@ -6,6 +6,7 @@ import { Container, Row, Col, Form, Button } from 'react-bootstrap';
 import axios from 'axios';
 import { animateScroll as scroll } from 'react-scroll';
 import { useAuth } from '../API/authContext';
+import { apiUrl } from '../API/config';
 import './Page.css';
 
 const Var = () => {
@@ -82,7 +83,7 @@ const Var = () => {
       weights: isDollar ? convertToDecimalWeights() : formData.weights.map(weight => (parseFloat(weight) / 100).toFixed(2))
     };
     try {
-      const response = await axios.post('http://ec2-3-94-107-189.compute-1.amazonaws.com:5000/api/v1/monte-carlo-var', formattedData);
+      const response = await axios.post(`${apiUrl}/monte-carlo-var`, formattedData);
       setResponseData(response.data.scenario_return);
       setIsGraphVisible(true);
       scroll.scrollToBottom();

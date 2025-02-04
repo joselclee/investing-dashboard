@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import axios from 'axios';
 import { auth } from './firebaseConfig';
+import { apiUrl } from './config';
 
 const AuthContext = createContext();
 
@@ -18,7 +19,7 @@ export const AuthProvider = ({ children }) => {
         const idToken = await user.getIdToken();
         const userId = user.uid;
         const response = await axios.get(
-          `http://ec2-3-94-107-189.compute-1.amazonaws.com:5000/api/v1/account/${userId}`,
+          `${apiUrl}/account/${userId}`,
           {
             headers: {
               Authorization: `Bearer ${idToken}`,

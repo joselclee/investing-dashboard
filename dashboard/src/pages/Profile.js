@@ -3,6 +3,7 @@ import { Container, Row, Col, Button, ListGroup } from 'react-bootstrap';
 import { Line } from 'react-chartjs-2';
 import axios from 'axios';
 import { useAuth } from '../API/authContext';
+import { apiUrl } from '../API/config';
 import './Page.css';
 import {
   Chart as ChartJS,
@@ -50,7 +51,7 @@ const Profile = () => {
         const idToken = await currentUser.getIdToken();
         const userId = currentUser.uid;
         const response = await axios.get(
-          `http://ec2-3-94-107-189.compute-1.amazonaws.com:5000/api/v1/account/${userId}`,
+          `${apiUrl}/account/${userId}`,
           {
             headers: {
               Authorization: `Bearer ${idToken}`,
@@ -79,7 +80,7 @@ const Profile = () => {
         const idToken = await currentUser.getIdToken();
         const userId = currentUser.uid;
         const response = await axios.get(
-          `http://ec2-3-94-107-189.compute-1.amazonaws.com:5000/api/v1/day-history/${userId}`,
+          `${apiUrl}/day-history/${userId}`,
           {
             headers: {
               Authorization: `Bearer ${idToken}`,

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Modal, Form, Button } from 'react-bootstrap';
 import axios from 'axios';
 import { useAuth } from '../API/authContext';
+import { apiUrl } from '../API/config';
 
 const AddTicker = ({ show, handleClose, onTickerAdded }) => {
   const [newTicker, setNewTicker] = useState('');
@@ -23,7 +24,7 @@ const AddTicker = ({ show, handleClose, onTickerAdded }) => {
           ],
         };
         await axios.post(
-          'http://ec2-3-94-107-189.compute-1.amazonaws.com:5000/api/v1/add-tickers',
+          `${apiUrl}/add-tickers`,
           payload,
           {
             headers: {

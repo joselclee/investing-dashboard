@@ -5,6 +5,7 @@ import axios from 'axios';
 import './SlideOutTab.css';
 import { useNavigate } from 'react-router-dom';
 import UpdateAccount from './UpdateAccount';
+import { apiUrl } from '../API/config';
 
 const SlideOutTab = ({ show, handleClose }) => {
   const { currentUser, logout, accountDetails } = useAuth();
@@ -25,7 +26,7 @@ const SlideOutTab = ({ show, handleClose }) => {
         const idToken = await currentUser.getIdToken();
         const userId = currentUser.uid;
         await axios.delete(
-          `http://ec2-3-94-107-189.compute-1.amazonaws.com:5000/api/v1/delete-account/${userId}`,
+          `${apiUrl}/delete-account/${userId}`,
           {
             headers: {
               Authorization: `Bearer ${idToken}`,

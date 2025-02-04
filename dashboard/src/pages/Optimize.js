@@ -7,6 +7,7 @@ import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip as ChartTooltip, Legend } from 'chart.js';
 import { animateScroll as scroll } from 'react-scroll';
 import { useAuth } from '../API/authContext';
+import { apiUrl } from '../API/config';
 import './Page.css';
 
 ChartJS.register(ArcElement, ChartTooltip, Legend);
@@ -87,7 +88,7 @@ const Optimize = () => {
     };
     console.log('Payload:', payload); // Debugging
     try {
-        const response = await axios.post('http://ec2-3-94-107-189.compute-1.amazonaws.com:5000/api/v1/optimize/monte-carlo', payload);
+        const response = await axios.post(`${apiUrl}/optimize/monte-carlo`, payload);
         console.log('Response:', response.data);
         const optimizedWeights = response.data.optimized_weights;
         setNewPortfolio({

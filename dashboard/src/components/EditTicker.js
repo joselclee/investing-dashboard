@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Modal, Form, Button } from 'react-bootstrap';
 import axios from 'axios';
 import { useAuth } from '../API/authContext';
+import { apiUrl } from '../API/config';
 
 import '../pages/Page.css';
 
@@ -19,7 +20,7 @@ const EditTicker = ({ show, handleClose, ticker, onTickerUpdated }) => {
         const idToken = await currentUser.getIdToken();
         const userId = currentUser.uid;
         await axios.put(
-          'http://ec2-3-94-107-189.compute-1.amazonaws.com:5000/api/v1/update-ticker-value',
+          `${apiUrl}/update-ticker-value`,
           {
             user_id: userId,
             ticker: ticker.ticker,

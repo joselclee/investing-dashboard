@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Modal, Form, Button } from 'react-bootstrap';
 import axios from 'axios';
 import { useAuth } from '../API/authContext';
+import { apiUrl } from '../API/config';
 
 const UpdateAccount = ({ show, handleClose, onOwnedUpdated, accountDetails }) => {
   const [firstName, setFirstName] = useState('');
@@ -31,7 +32,7 @@ const UpdateAccount = ({ show, handleClose, onOwnedUpdated, accountDetails }) =>
           start_date: startDate,
         };
         await axios.put(
-          `http://ec2-3-94-107-189.compute-1.amazonaws.com:5000/api/v1/account/${userId}/update-account`,
+          `${apiUrl}/account/${userId}/update-account`,
           data,
           {
             headers: {
