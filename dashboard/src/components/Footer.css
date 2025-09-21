@@ -2,15 +2,12 @@
     color: #fff;
     padding: 20px;
     text-align: right;
-    position: fixed;
-    left: 0;
-    bottom: 0;
     width: 100%;
-    z-index: 1 !important;
+    background-color: rgb(245, 245, 245);
 }
 
 .footer a {
-    color: #fff;
+    color: #000;
     text-decoration: none;
     margin: 0 10px;
 }

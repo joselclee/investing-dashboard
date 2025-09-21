@@ -1,10 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useAuth } from '../API/authContext';
 import { Container, Row, Col, Button, Form, Alert } from 'react-bootstrap';
 import { Link, Navigate } from 'react-router-dom';
 
-import Header from '../components/Header';
-import Footer from '../components/Footer';
 import './Page.css';
 
 const Login = () => {
@@ -29,7 +27,6 @@ const Login = () => {
 
   return (
     <div>
-      <Header />
       <Container className="full-height">
         <Row className="justify-content-center align-items-center" style={{ height: '100vh' }}>
           <Col xs={12} md={4}>
@@ -69,7 +66,6 @@ const Login = () => {
           </Col>
         </Row>
       </Container>
-      <Footer />
     </div>
   );
 };

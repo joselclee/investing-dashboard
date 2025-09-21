@@ -1,5 +1,12 @@
 .App {
   text-align: center;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.App-main {
+  flex: 1;
 }
 
 .App-logo {
